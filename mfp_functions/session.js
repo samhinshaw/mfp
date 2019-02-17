@@ -1,10 +1,20 @@
 const cheerio = require('cheerio');
 const superagent = require('superagent');
 
+const utils = require('./utils');
+const { parsePage } = require('./parsers/parser');
+const {
+  getTableContents,
+  formatExerciseObject,
+} = require('./getters/get-table-contents');
+const getWater = require('./getters/get-water');
 const checkAccess = require('./parsers/check-access');
 
 /**
- *
+ * This session class authenticates a user with their MyFitnessPal credentials,
+ * allowing them to make subsequent authenticated requests. Here we use a class
+ * instance of a superagent instance, allowing us to retain cookies between
+ * requests.
  *
  * @class Session
  */
@@ -13,7 +23,11 @@ class Session {
    *Creates an instance of Session.
    * @memberof Session
    */
-  constructor() {
+  constructor(username) {
+    if (typeof username !== 'string') {
+      throw new Error('Please supply username as a string.');
+    }
+    this.username = username;
     this.agent = superagent.agent();
     this.headers = {
       'User-Agent':
@@ -23,25 +37,30 @@ class Session {
   }
 
   /**
+   * Log in to MyFitnessPal.
    *
-   *
-   * @param {*} username
-   * @param {*} password
-   * @returns
+   * @param {string} password MyFitnessPal password
+   * @returns Promise<Session>
    * @memberof Session
    */
-  login(username, password) {
-    const authSession = this.getCRSF()
-      .then(() => this.inputPassword(username, password))
-      .then(() => this.getToken());
-
-    return authSession;
+  login(password) {
+    if (typeof password !== 'string') {
+      throw new Error('Please supply password as a string.');
+    }
+    return new Promise((resolve, reject) => {
+      this.getCRSF()
+        .then(() => this.inputPassword(this.username, password))
+        .then(() => this.getToken())
+        .then(() => resolve(this))
+        .catch(err => reject(err));
+    });
   }
 
   /**
+   * Get the CRSF token on the login page to send with the login request, saving
+   * it to the instance.
    *
-   *
-   * @returns
+   * @returns Promise<void>
    * @memberof Session
    */
   getCRSF() {
@@ -63,11 +82,11 @@ class Session {
   }
 
   /**
+   * POST user, pass & CRSF to the server for login.
    *
-   *
-   * @param {*} username
-   * @param {*} password
-   * @returns
+   * @param {string} username
+   * @param {string} password
+   * @returns Promise<void>
    * @memberof Session
    */
   inputPassword(username, password) {
@@ -95,9 +114,10 @@ class Session {
   }
 
   /**
+   * Get the authentication token to send with subsequent requests and update
+   * the session headers. Set this.authenticated = true.
    *
-   *
-   * @returns
+   * @returns Promise<void>
    * @memberof Session
    */
   getToken() {
@@ -123,6 +143,114 @@ class Session {
         .catch(err => {
           reject(err);
         });
+    });
+  }
+
+  /**
+   * Get data for specified dates
+   *
+   * @param {*} fields The fields you wish to retrieve
+   * @param {*} startDate The date you wish to retrieve, or the start of the
+   * range of dates you wish to retrieve
+   * @param {*} [endDate=startDate] (optional) The end date of the range you
+   * wish to retrieve. If left out, will only fetch data for the startDate.
+   * @returns Promise<Data> A promise which will resolve to the requested Data
+   * object.
+   * @memberof Session
+   */
+  fetch(fields, startDate, endDate = startDate) {
+    // Construct the url to get food & exercise
+    const printedDiaryUrl = utils.mfpUrl(this.username, startDate, endDate);
+    // Use the authenticated agent if we are logged in
+    const agent = this.authenticated ? this.agent : superagent;
+
+    return new Promise((resolve, reject) => {
+      parsePage(printedDiaryUrl, agent)
+        .then(async $ => {
+          const diaryEntries = [];
+
+          // For each diary entry encountered, add the date formatted as
+          // YYYY-MM-DD and the food & exercise tables the entry array.
+          $('.main-title-2').each((index, el) => {
+            const element = $(el);
+            diaryEntries.push({
+              date: utils.formatDate(new Date(element.text())),
+              foodTable: element.next('#food'),
+              exerciseTable: element.next('#excercise'),
+            });
+          });
+
+          // iterate through all dates and push data into a final results object
+          const results = await diaryEntries.map(async diaryEntry => {
+            const result = {};
+            // get food if it was requested
+            if (fields.food && diaryEntry.foodTable.length) {
+              result.food = getTableContents(diaryEntry.foodTable, $);
+            }
+
+            // get exercise if it was requested
+            if (fields.exercise && diaryEntry.exerciseTable.length) {
+              result.exercise = formatExerciseObject(
+                getTableContents(diaryEntry.exerciseTable, $)
+              );
+            }
+            if (fields.water) {
+              const waterApiUrl = utils.mfpwaterApiUrl(
+                this.username,
+                diaryEntry.date
+              );
+              result.water = await getWater(waterApiUrl, agent);
+            }
+
+            return result;
+          });
+
+          resolve(Promise.all(results));
+        })
+        .catch(err => reject(err));
+    });
+  }
+
+  fetchSingleDate(date, fields) {
+    // Construct the url to get food & exercise
+    const printedDiaryUrl = utils.mfpUrl(this.username, date, date);
+    // Use the authenticated agent if we are logged in
+    const agent = this.authenticated ? this.agent : superagent;
+    return new Promise((resolve, reject) => {
+      parsePage(printedDiaryUrl, agent)
+        .then(async $ => {
+          const diaryEntry = {
+            date,
+            foodTable: $('#food'),
+            exerciseTable: $('#excercise'),
+          };
+
+          const result = {
+            date,
+          };
+
+          // get food if it was requested
+          if (fields.food && diaryEntry.foodTable.length) {
+            result.food = getTableContents(diaryEntry.foodTable, $);
+          }
+
+          // get exercise if it was requested
+          if (fields.exercise && diaryEntry.exerciseTable.length) {
+            result.exercise = formatExerciseObject(
+              getTableContents(diaryEntry.exerciseTable, $)
+            );
+          }
+
+          // get water if it was requested (this requires a different API call)
+          if (fields.water) {
+            const waterApiUrl = utils.mfpwaterApiUrl(this.username, date);
+            result.water = await getWater(waterApiUrl, agent);
+            resolve(result);
+          } else {
+            resolve(result);
+          }
+        })
+        .catch(err => reject(err));
     });
   }
 }
