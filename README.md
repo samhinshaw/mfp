@@ -2,8 +2,6 @@
 
 A third-party API for accessing MyFitnessPal diary data.
 
-For it to work, you should set your [diary privacy status to "public"](https://www.myfitnesspal.com/account/diary_settings).
-
 [![NPM](http://img.shields.io/npm/v/mfp.svg)](https://www.npmjs.org/package/mfp)
 [![Circle CI](https://circleci.com/gh/fitnessforlife/mfp.svg?style=shield&circle-token=e1f56bff19b1519adb77480cbb13550a0d3028e8)](https://circleci.com/gh/fitnessforlife/mfp)
 [![Dependency Checker](http://img.shields.io/david/fitnessforlife/mfp.svg)](https://david-dm.org/fitnessforlife/mfp)
@@ -16,17 +14,25 @@ npm install mfp --save
 
 # Usage
 
-```
-var mfp = require('mfp');
+```js
+const { Session } = require('mfp');
 ```
 
-## `mfp.fetchSingleDate(username, date, [fields][, session])`
+## `new Session(username)` -> `Session`
+
+Initialize a new session for a given username. Returns a new `Session` object.
+
+## `session.login(password)` -> `Promise<Session>`
+
+(optional) Log in with the username's password. Returns a promise which resolves
+to the authenticated `Session` object.
+
+## `session.fetchSingleDate(fields, date)` -> `Promise<Data>`
 
 Asynchronously scrapes nutrient data from a user's food diary on a given date.
 
-- username `String`
 - date `String` with format YYYY-MM-DD
-- optional fields `Object` in the following format, which specifies the desired fields:
+- fields `Object` in the following format, which specifies the desired fields:
 
   ```js
   {
@@ -36,95 +42,96 @@ Asynchronously scrapes nutrient data from a user's food diary on a given date.
   }
   ```
 
-  Any missing field not be returned
+  Any missing field will not be returned.
 
-- returns a `Promise`, which resolves to:
+- returns a `Promise`, which resolves to a data object in the Data format.
 
-  ```js
-  {
-    date: "2019-01-01",
-    food: {
-      calories: 2000,
-    },
-    exercise: {
-      cardio: {
-        calories: 102,
-        minutes: 	12
-      }
-    }
-  }
-  ```
-
-Example 1:
-
-```js
-mfp
-  .fetchSingleDate('username', '2014-09-15', 'all')
-  .then(data => console.log(data))
-  .catch(err => console.error(err));
-```
-
-Example 2:
-
-```js
-mfp
-  .fetchSingleDate('username', '2014-09-15', [
-    'calories',
-    'protein',
-    'carbs',
-    'fat',
-  ])
-  .then(data => console.log(data))
-  .catch(err => console.error(err));
-```
-
-## `mfp.fetchDateRange(username, dateStart, dateEnd, [fields], callback)`
+## `session.fetchDateRange(fields, startDate, endDate)` -> `Promise<Data[]>`
 
 Asynchronously scrapes nutrient data from a user's food diary on a given date.
 
-- username `String`
 - dateStart `String` with format YYYY-MM-DD
 - dateEnd `String` with format YYYY-MM-DD
-- fields `String` or `Array`
-  - `String` 'all', which will fetch data for all nutrient fields
-  - `Array` of nutrient field names, each a `String`. Allowable field names:
-    - 'calories'
-    - 'carbs'
-    - 'fat'
-    - 'protein'
-    - 'cholesterol'
-    - 'sodium'
-    - 'fiber'
-    - 'sugar'
-    - 'water'
-- callback `Function`
-  - the callback is passed a single argument `data`, which will be an `Object`
-    with the following format:
-    Eg.
-  ```
-  { username: 'exampleUser',
-    data: [
-      { 'date': '2014-07-05', 'calories': 2078, 'carbs': 98, 'fat': 119, 'saturated fat': 35, 'protein': 153 },
-      { 'date': '2014-07-06', 'calories': 2078, 'carbs': 98, 'fat': 119, 'saturated fat': 35, 'protein': 153 },
-      { 'date': '2014-07-07', 'calories': 2078, 'carbs': 98, 'fat': 119, 'saturated fat': 35, 'protein': 153 }
-    ]
+- fields `Object` in the following format, which specifies the desired fields:
+
+  ```js
+  {
+    food: true,
+    water: true,
+    exercise: true
   }
   ```
 
-Example 1:
+- returns a `Promise`, which resolves to a an array of data objects in the Data format.
 
-```
-mfp.fetchDateRange('username', '2014-09-15', '2014-09-18', 'all', function(data){
-  console.log(data);
-});
+## `Data` format
+
+```js
+{
+  date: "2019-01-01",
+  food: {
+    calories: 2000,
+  },
+  water: 500,
+  exercise: {
+    cardio: {
+      calories: 102,
+      minutes: 	12
+    }
+  }
+}
 ```
 
-Example 2:
+## Examples
 
+### 1. Async/Await; Fetch a Range of Dates
+
+```js
+const session = new Session('mfpUsername');
+
+async function getData() {
+  try {
+    // secure retrieval of password not shown, supply password as you wish
+    const authSession = await session.login(securelyObtainedPassword);
+
+    const data = await authSession.fetchDateRange(
+      {
+        food: true,
+        exercise: true,
+      },
+      '2019-02-01',
+      '2019-02-16'
+    );
+
+    console.log(data);
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+getData();
 ```
-mfp.fetchDateRange('username', '2014-09-15', '2014-09-18', ['calories', 'protein', 'carbs', 'fat'], function(data){
-  console.log(data);
-});
+
+### 2. Promise.then; Fetch a Single Date
+
+```js
+const session = new Session('mfpUsername');
+
+// secure retrieval of password not shown, supply password as you wish
+session
+  .login(securelyObtainedPassword)
+  .then(authSession =>
+    authSession.fetchSingleDate(
+      {
+        food: true,
+        exercise: true,
+        water: true,
+      },
+      '2019-02-07'
+    )
+  )
+  .then(data => console.log(data))
+  .catch(err => console.error(err));
 ```
 
 ## mfp.diaryStatusCheck(username, callback)
