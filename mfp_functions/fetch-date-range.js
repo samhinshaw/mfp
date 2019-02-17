@@ -17,12 +17,12 @@ const utils = require('./utils');
  */
 function fetchDateRange(username, startDate, endDate, fields, session) {
   // Construct the url to get food & exercise
-  const foodURL = utils.mfpUrl(username, startDate, endDate);
+  const printedDiaryUrl = utils.mfpUrl(username, startDate, endDate);
   // Use the authenticated agent if it was provided
   const agent = session.agent ? session.agent : superagent;
   // Then fetch the requested data
   return new Promise((resolve, reject) => {
-    parsePage(foodURL, agent)
+    parsePage(printedDiaryUrl, agent)
       .then(async $ => {
         const diaryEntries = [];
 
@@ -43,8 +43,8 @@ function fetchDateRange(username, startDate, endDate, fields, session) {
           result.date = entry.date;
           // get water if it was requested (this requires a different API call)
           if (fields === 'all' || fields.includes('water')) {
-            const waterURL = utils.mfpWaterUrl(username, entry.date);
-            result.water = await getWater(waterURL, agent);
+            const waterApiUrl = utils.mfpwaterApiUrl(username, entry.date);
+            result.water = await getWater(waterApiUrl, agent);
           }
           return result;
         });

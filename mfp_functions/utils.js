@@ -38,7 +38,7 @@ module.exports = {
     // Otherwise no date was specified, and we'll just return today's entry
     return `https://www.myfitnesspal.com/reports/printable_diary/${userId}`;
   },
-  mfpWaterUrl(userId, date) {
+  mfpwaterApiUrl(userId, date) {
     if (typeof userId !== 'string')
       throw new TypeError("User ID must be 'string'");
 
