@@ -3,7 +3,6 @@ const cheerio = require('cheerio');
 const helpers = require('./utils');
 
 function diaryStatusCheck(username, callback) {
-  // get MyFitnessPal URL (eg. 'https://www.myfitnesspal.com/reports/printable_diary/npmmfp')
   const url = helpers.mfpUrl(username);
 
   const options = {
