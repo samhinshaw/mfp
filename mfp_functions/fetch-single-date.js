@@ -30,7 +30,7 @@ function fetchSingleDate(username, date, fields, session) {
           $exerciseTable: $('#excercise'),
         };
 
-        const results = await getFood(diaryEntry.$foodTable, fields, $);
+        const results = getFood(diaryEntry.foodTable, fields, $);
 
         // add date to results object
         results.date = date;
@@ -39,9 +39,10 @@ function fetchSingleDate(username, date, fields, session) {
         if (fields === 'all' || fields.includes('water')) {
           const waterURL = utils.mfpWaterUrl(username, date);
           results.water = await getWater(waterURL, agent);
+          resolve(results);
+        } else {
+          resolve(results);
         }
-
-        resolve(results);
       })
       .catch(err => reject(err));
   });

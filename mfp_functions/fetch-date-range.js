@@ -39,7 +39,7 @@ function fetchDateRange(username, startDate, endDate, fields, session) {
 
         // iterate through all dates and push data into a final results object
         const results = await diaryEntries.map(async entry => {
-          const result = await getFood(entry.$foodTable, fields, $);
+          const result = getFood(entry.foodTable, fields, $);
           result.date = entry.date;
           // get water if it was requested (this requires a different API call)
           if (fields === 'all' || fields.includes('water')) {
