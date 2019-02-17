@@ -46,9 +46,7 @@
     "gulp": "^3.9.0",
     "gulp-coveralls": "^0.1.4",
     "gulp-istanbul": "^0.10.0",
-    "gulp-jshint": "^1.11.0",
     "gulp-mocha": "^2.1.2",
-    "jshint-stylish": "^2.0.1",
     "nock": "^2.6.0",
     "prettier": "^1.16.4"
   }
