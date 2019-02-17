@@ -26,8 +26,8 @@ function fetchSingleDate(username, date, fields, session) {
         // fetchSingleDate and fetchDateRange
         const diaryEntry = {
           date,
-          $foodTable: $('#food'),
-          $exerciseTable: $('#excercise'),
+          foodTable: $('#food'),
+          exerciseTable: $('#excercise'),
         };
 
         const results = getFood(diaryEntry.foodTable, fields, $);

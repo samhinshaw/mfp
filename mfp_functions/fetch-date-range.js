@@ -28,12 +28,12 @@ function fetchDateRange(username, startDate, endDate, fields, session) {
 
         // For each diary entry encountered, add the date formatted as
         // YYYY-MM-DD and the food & exercise tables the entry array.
-        $('.main-title-2').each((index, element) => {
-          const $element = $(element);
+        $('.main-title-2').each((index, el) => {
+          const element = $(el);
           diaryEntries.push({
-            date: utils.formatDate(new Date($element.text())),
-            $foodTable: $element.next('#food'),
-            $exerciseTable: $('#excercise'),
+            date: utils.formatDate(new Date(element.text())),
+            foodTable: element.next('#food'),
+            exerciseTable: element.next('#excercise'),
           });
         });
 
