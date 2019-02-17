@@ -1,18 +1,14 @@
-'use strict';
-
 const cheerio = require('cheerio');
 const superagent = require('superagent');
 
-const INCORRECT_PASSWORD_MESSAGE = 'Incorrect username or password';
-const MAXIMUM_ATTEMPT_MESSAGE =
-  'You have exceeded the maximum number of consecutive failed login attempts';
+const checkAccess = require('./check-access');
 
 class Session {
   constructor() {
     this.agent = superagent.agent();
     this.headers = {
       'User-Agent':
-        'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36'
+        'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36',
     };
     this.authenticated = false;
   }
@@ -51,20 +47,15 @@ class Session {
         .send({
           utf8: this.utf8Value,
           authenticity_token: this.authenticityToken,
-          username: username,
-          password: password
+          username,
+          password,
         })
         .then(res => {
-          var $ = cheerio.load(res.text);
+          const $ = cheerio.load(res.text);
 
-          if ($(`p:contains("${INCORRECT_PASSWORD_MESSAGE}")`).length > 0) {
-            reject(INCORRECT_PASSWORD_MESSAGE);
-          }
-
-          if ($(`p:contains("${MAXIMUM_ATTEMPT_MESSAGE}")`).length > 0) {
-            reject(MAXIMUM_ATTEMPT_MESSAGE);
-          }
-          resolve();
+          checkAccess($)
+            .then(resolve())
+            .catch(err => reject(err));
         })
         .catch(err => {
           reject(err);
@@ -79,13 +70,13 @@ class Session {
         .query({ refresh: true })
         .then(res => {
           if (!res.ok) {
-            reject(`Unable to get Auth Token: Status ${res.status}`);
+            reject(new Error(`Unable to get Auth Token: Status ${res.status}`));
           } else {
             // update our request headers with the necessary auth info
             this.headers = Object.assign({}, this.headers, {
               Authorization: `${res.body.token_type} ${res.body.access_token}`,
               'mfp-client-id': 'mfp-main-js',
-              'mfp-user-id': res.body.user_id
+              'mfp-user-id': res.body.user_id,
             });
             // and add a flag signifying we are authenticated
             this.authenticated = true;
@@ -100,6 +91,3 @@ class Session {
 }
 
 module.exports = Session;
-
-// Later on:
-var newHeaders = {};
