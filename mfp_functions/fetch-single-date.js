@@ -1,12 +1,12 @@
 const superagent = require('superagent');
 
 const utils = require('./utils');
-const { parsePage } = require('./parser');
+const { parsePage } = require('./parsers/parser');
 const {
   getTableContents,
   formatExerciseObject,
-} = require('./get-table-contents');
-const getWater = require('./get-water');
+} = require('./getters/get-table-contents');
+const getWater = require('./getters/get-water');
 
 // some notes: we use the printable diary for most checks, but not water, which can't be fetched here.
 /**

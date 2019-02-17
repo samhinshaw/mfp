@@ -1,4 +1,4 @@
-const { parseJSON } = require('./parser');
+const { parseJSON } = require('../parsers/parser');
 
 function getWater(url, agent) {
   return new Promise((resolve, reject) => {

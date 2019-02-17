@@ -1,11 +1,11 @@
 const superagent = require('superagent');
 
-const getWater = require('./get-water');
-const { parsePage } = require('./parser');
+const getWater = require('./getters/get-water');
+const { parsePage } = require('./parsers/parser');
 const {
   getTableContents,
   formatExerciseObject,
-} = require('./get-table-contents');
+} = require('./getters/get-table-contents');
 const utils = require('./utils');
 
 /**

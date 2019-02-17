@@ -1,5 +1,5 @@
-const utils = require('./utils');
-const { shorthandFields } = require('./constants');
+const utils = require('../utils');
+const { shorthandFields } = require('../constants');
 
 function getTableContents(tableSelector, $) {
   // First check that table exists

@@ -1,7 +1,7 @@
 const cheerio = require('cheerio');
 const superagent = require('superagent');
 
-const checkAccess = require('./check-access');
+const checkAccess = require('./parsers/check-access');
 
 /**
  *
