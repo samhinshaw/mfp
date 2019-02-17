@@ -3,7 +3,7 @@ require('chai').should();
 const {
   convertToNum,
   mfpUrl,
-  formatDate
+  formatDate,
 } = require('../mfp_functions/utils.js');
 
 const nonStringTypes = [true, [], {}, null, 1234];

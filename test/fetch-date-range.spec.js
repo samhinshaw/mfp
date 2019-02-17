@@ -25,7 +25,7 @@ describe('fetchDateRange', () => {
           cholesterol: 1123,
           sodium: 3031,
           sugar: 14,
-          fiber: 5
+          fiber: 5,
         },
         {
           date: '2014-09-14',
@@ -36,7 +36,7 @@ describe('fetchDateRange', () => {
           cholesterol: 1123,
           sodium: 3031,
           sugar: 14,
-          fiber: 5
+          fiber: 5,
         },
         {
           date: '2014-09-15',
@@ -47,7 +47,7 @@ describe('fetchDateRange', () => {
           cholesterol: 264,
           sodium: 2103,
           sugar: 10,
-          fiber: 3
+          fiber: 3,
         },
         {
           date: '2014-09-16',
@@ -58,7 +58,7 @@ describe('fetchDateRange', () => {
           cholesterol: 979,
           sodium: 2368,
           sugar: 14,
-          fiber: 5
+          fiber: 5,
         },
         {
           date: '2014-09-17',
@@ -69,9 +69,9 @@ describe('fetchDateRange', () => {
           cholesterol: 1003,
           sodium: 1346,
           sugar: 4,
-          fiber: 0
-        }
-      ]
+          fiber: 0,
+        },
+      ],
     };
 
     fetchDateRange('npmmfp', '2014-09-13', '2014-09-17', 'all', data => {
@@ -92,8 +92,8 @@ describe('fetchDateRange', () => {
         { date: '2014-09-14', calories: 2078, carbs: 98 },
         { date: '2014-09-15', calories: 1278, carbs: 39 },
         { date: '2014-09-16', calories: 1470, carbs: 98 },
-        { date: '2014-09-17', calories: 1013, carbs: 5 }
-      ]
+        { date: '2014-09-17', calories: 1013, carbs: 5 },
+      ],
     };
 
     fetchDateRange(

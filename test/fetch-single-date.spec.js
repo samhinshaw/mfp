@@ -25,7 +25,7 @@ describe('fetchSingleDate', () => {
       sodium: 3031,
       sugar: 14,
       fiber: 5,
-      water: 0
+      water: 0,
     };
 
     fetchSingleDate('npmmfp', '2014-09-13', 'all', data => {
@@ -51,7 +51,7 @@ describe('fetchSingleDate', () => {
       sodium: 3031,
       sugar: 14,
       fiber: 5,
-      water: 0
+      water: 0,
     };
 
     fetchSingleDate('npmmfp', '2014-09-13', 'all', data => {
@@ -70,7 +70,7 @@ describe('fetchSingleDate', () => {
       calories: 2078,
       fat: 119,
       cholesterol: 1123,
-      sugar: 14
+      sugar: 14,
     };
 
     fetchSingleDate(
@@ -94,7 +94,7 @@ describe('fetchSingleDate', () => {
       calories: 2078,
       fat: 119,
       cholesterol: 1123,
-      sugar: 14
+      sugar: 14,
     };
 
     fetchSingleDate(
