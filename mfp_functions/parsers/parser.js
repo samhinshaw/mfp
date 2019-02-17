@@ -12,13 +12,8 @@ const checkAccess = require('./check-access');
  * @param {*} [agent]
  * @returns
  */
-function parsePage(url, agent) {
+function parsePage(url, agent, headers) {
   return new Promise((resolve, reject) => {
-    const headers = {
-      'User-Agent':
-        'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36',
-    };
-
     agent
       .get(url)
       .set(headers)
@@ -37,13 +32,8 @@ function parsePage(url, agent) {
   });
 }
 
-function parseJSON(url, agent) {
+function parseJSON(url, agent, headers) {
   return new Promise((resolve, reject) => {
-    const headers = {
-      'User-Agent':
-        'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36',
-    };
-
     agent
       .get(url)
       .set(headers)

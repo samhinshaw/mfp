@@ -201,7 +201,7 @@ class Session {
     const agent = this.authenticated ? this.agent : superagent;
 
     return new Promise((resolve, reject) => {
-      parsePage(printedDiaryUrl, agent)
+      parsePage(printedDiaryUrl, agent, this.headers)
         .then(async $ => {
           const diaryEntries = [];
 
@@ -235,7 +235,7 @@ class Session {
                 this.username,
                 diaryEntry.date
               );
-              result.water = await getWater(waterApiUrl, agent);
+              result.water = await getWater(waterApiUrl, agent, this.headers);
             }
 
             return result;
