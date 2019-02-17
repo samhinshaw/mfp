@@ -17,7 +17,7 @@ const getWater = require('./get-water');
  * @param {*} [session] Optional; an authenticated session returned from session.login()
  * @returns A results object containing the username and the data for the dates requested
  */
-function fetchSingleDate(username, date, fields, session = superagent {
+function fetchSingleDate(username, date, fields, session = superagent) {
   // Construct the url to get food & exercise
   const printedDiaryUrl = utils.mfpUrl(username, date, date);
   // Use the authenticated agent if it was provided
