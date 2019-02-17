@@ -3,7 +3,16 @@ const superagent = require('superagent');
 
 const checkAccess = require('./check-access');
 
+/**
+ *
+ *
+ * @class Session
+ */
 class Session {
+  /**
+   *Creates an instance of Session.
+   * @memberof Session
+   */
   constructor() {
     this.agent = superagent.agent();
     this.headers = {
@@ -13,6 +22,14 @@ class Session {
     this.authenticated = false;
   }
 
+  /**
+   *
+   *
+   * @param {*} username
+   * @param {*} password
+   * @returns
+   * @memberof Session
+   */
   login(username, password) {
     const authSession = this.getCRSF()
       .then(() => this.inputPassword(username, password))
@@ -21,6 +38,12 @@ class Session {
     return authSession;
   }
 
+  /**
+   *
+   *
+   * @returns
+   * @memberof Session
+   */
   getCRSF() {
     return new Promise((resolve, reject) => {
       this.agent
@@ -39,6 +62,14 @@ class Session {
     });
   }
 
+  /**
+   *
+   *
+   * @param {*} username
+   * @param {*} password
+   * @returns
+   * @memberof Session
+   */
   inputPassword(username, password) {
     return new Promise((resolve, reject) => {
       this.agent
@@ -63,6 +94,12 @@ class Session {
     });
   }
 
+  /**
+   *
+   *
+   * @returns
+   * @memberof Session
+   */
   getToken() {
     return new Promise((resolve, reject) => {
       this.agent

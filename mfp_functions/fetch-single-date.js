@@ -2,15 +2,11 @@ const superagent = require('superagent');
 
 const utils = require('./utils');
 const { parsePage } = require('./parser');
-const getFood = require('./get-food');
-const getExercise = require('./get-exercise');
-const getWater = require('./get-water');
-
 const {
-  checkShouldGetFood,
-  checkShouldGetExercise,
-  checkShouldGetWater,
-} = require('./check-relevant-fields');
+  getTableContents,
+  formatExerciseObject,
+} = require('./get-table-contents');
+const getWater = require('./get-water');
 
 // some notes: we use the printable diary for most checks, but not water, which can't be fetched here.
 /**
@@ -21,7 +17,7 @@ const {
  * @param {*} [session] Optional; an authenticated session returned from session.login()
  * @returns A results object containing the username and the data for the dates requested
  */
-function fetchSingleDate(username, date, fields, session) {
+function fetchSingleDate(username, date, fields, session = superagent {
   // Construct the url to get food & exercise
   const printedDiaryUrl = utils.mfpUrl(username, date, date);
   // Use the authenticated agent if it was provided
@@ -29,35 +25,35 @@ function fetchSingleDate(username, date, fields, session) {
   return new Promise((resolve, reject) => {
     parsePage(printedDiaryUrl, agent)
       .then(async $ => {
-        // This is done to keep the getFood API consistent between
-        // fetchSingleDate and fetchDateRange
         const diaryEntry = {
           date,
           foodTable: $('#food'),
           exerciseTable: $('#excercise'),
         };
 
-        const results = {
+        const result = {
           date,
         };
 
         // get food if it was requested
-        if (checkShouldGetFood(fields)) {
-          results.food = getFood(diaryEntry.foodTable, fields, $);
+        if (fields.food && diaryEntry.foodTable.length) {
+          result.food = getTableContents(diaryEntry.foodTable, $);
         }
 
         // get exercise if it was requested
-        if (checkShouldGetExercise(fields)) {
-          results.exercise = getExercise(diaryEntry.exerciseTable, fields, $);
+        if (fields.exercise && diaryEntry.exerciseTable.length) {
+          result.exercise = formatExerciseObject(
+            getTableContents(diaryEntry.exerciseTable, $)
+          );
         }
 
         // get water if it was requested (this requires a different API call)
-        if (checkShouldGetWater(fields)) {
+        if (fields.water) {
           const waterApiUrl = utils.mfpwaterApiUrl(username, date);
-          results.water = await getWater(waterApiUrl, agent);
-          resolve(results);
+          result.water = await getWater(waterApiUrl, agent);
+          resolve(result);
         } else {
-          resolve(results);
+          resolve(result);
         }
       })
       .catch(err => reject(err));

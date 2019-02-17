@@ -1,8 +1,11 @@
 const superagent = require('superagent');
 
-const getFood = require('./get-food');
 const getWater = require('./get-water');
 const { parsePage } = require('./parser');
+const {
+  getTableContents,
+  formatExerciseObject,
+} = require('./get-table-contents');
 const utils = require('./utils');
 
 /**
@@ -15,7 +18,13 @@ const utils = require('./utils');
  * @param {*} [session] Optional; an authenticated session returned from session.login()
  * @returns A results object containing the username and the data for the dates requested
  */
-function fetchDateRange(username, startDate, endDate, fields, session) {
+function fetchDateRange(
+  username,
+  startDate,
+  endDate,
+  fields,
+  session = superagent
+) {
   // Construct the url to get food & exercise
   const printedDiaryUrl = utils.mfpUrl(username, startDate, endDate);
   // Use the authenticated agent if it was provided
@@ -38,12 +47,21 @@ function fetchDateRange(username, startDate, endDate, fields, session) {
         });
 
         // iterate through all dates and push data into a final results object
-        const results = await diaryEntries.map(async entry => {
-          const result = getFood(entry.foodTable, fields, $);
-          result.date = entry.date;
-          // get water if it was requested (this requires a different API call)
-          if (fields === 'all' || fields.includes('water')) {
-            const waterApiUrl = utils.mfpwaterApiUrl(username, entry.date);
+        const results = await diaryEntries.map(async diaryEntry => {
+          const result = {};
+          // get food if it was requested
+          if (fields.food && diaryEntry.foodTable.length) {
+            result.food = getTableContents(diaryEntry.foodTable, $);
+          }
+
+          // get exercise if it was requested
+          if (fields.exercise && diaryEntry.exerciseTable.length) {
+            result.exercise = formatExerciseObject(
+              getTableContents(diaryEntry.exerciseTable, $)
+            );
+          }
+          if (fields.water) {
+            const waterApiUrl = utils.mfpwaterApiUrl(username, diaryEntry.date);
             result.water = await getWater(waterApiUrl, agent);
           }
           return result;

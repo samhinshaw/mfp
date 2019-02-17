@@ -1,7 +1,14 @@
 const utils = require('./utils');
 const { shorthandFields } = require('./constants');
 
-function getTableContents(table, fields, $) {
+function getTableContents(tableSelector, $) {
+  // First check that table exists
+  if ($(tableSelector).length < 1) {
+    return {};
+  }
+
+  const table = $(tableSelector);
+
   // set results object to store data
   const results = {};
 
@@ -30,7 +37,7 @@ function getTableContents(table, fields, $) {
   const dataRow = table.find('tfoot').find('tr');
 
   // store data for each requested field in results
-  fields.forEach(field => {
+  Object.keys(cols).forEach(field => {
     const col = cols[field] + 1; // because nth-child selector is 1-indexed, not 0-indexed
     const mfpData = dataRow
       .find(`td:nth-child(${col})`)
@@ -42,4 +49,18 @@ function getTableContents(table, fields, $) {
   return results;
 }
 
-module.exports = getTableContents;
+function formatExerciseObject(exercise) {
+  return {
+    cardio: {
+      calories: exercise.calories,
+      minutes: exercise.minutes,
+    },
+    strength: {
+      sets: exercise.sets,
+      reps: exercise.reps,
+      weight: exercise.weight,
+    },
+  };
+}
+
+module.exports = { getTableContents, formatExerciseObject };

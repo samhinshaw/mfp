@@ -32,7 +32,7 @@ function checkShouldGetFood(fields) {
 }
 
 function checkShouldGetExercise(fields) {
-  const relevantFields = getRelevantFields(fields, foodFields);
+  const relevantFields = getRelevantFields(fields, exerciseFields);
   if (relevantFields.length < 1) {
     return false;
   }
@@ -40,7 +40,7 @@ function checkShouldGetExercise(fields) {
 }
 
 function checkShouldGetWater(fields) {
-  if (fields === 'all' || fields.includes('water')) {
+  if (fields === 'all' || fields === 'food' || fields.includes('water')) {
     return true;
   }
   return false;
