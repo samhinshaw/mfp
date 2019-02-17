@@ -48,9 +48,9 @@ class Session {
       throw new Error('Please supply password as a string.');
     }
     return new Promise((resolve, reject) => {
-      this.getCRSF()
-        .then(() => this.inputPassword(this.username, password))
-        .then(() => this.getToken())
+      this._getCRSF()
+        .then(() => this._inputPassword(this.username, password))
+        .then(() => this._getToken())
         .then(() => resolve(this))
         .catch(err => reject(err));
     });
@@ -63,7 +63,7 @@ class Session {
    * @returns Promise<void>
    * @memberof Session
    */
-  getCRSF() {
+  _getCRSF() {
     return new Promise((resolve, reject) => {
       this.agent
         .get('https://www.myfitnesspal.com/account/login')
@@ -89,7 +89,7 @@ class Session {
    * @returns Promise<void>
    * @memberof Session
    */
-  inputPassword(username, password) {
+  _inputPassword(username, password) {
     return new Promise((resolve, reject) => {
       this.agent
         .post('https://www.myfitnesspal.com/account/login')
@@ -120,7 +120,7 @@ class Session {
    * @returns Promise<void>
    * @memberof Session
    */
-  getToken() {
+  _getToken() {
     return new Promise((resolve, reject) => {
       this.agent
         .get('https://www.myfitnesspal.com/user/auth_token')
@@ -147,6 +147,42 @@ class Session {
   }
 
   /**
+   * Fetch data for a single date
+   *
+   * @param {*} fields
+   * @param {*} date
+   * @returns An object containing the data requested
+   * @memberof Session
+   */
+  fetchSingleDate(fields, date) {
+    return new Promise(async (resolve, reject) => {
+      this._fetch(fields, date)
+        .then(res => {
+          // _fetch always returns an array, so we need to spread it
+          resolve(...res);
+        })
+        .catch(err => reject(err));
+    });
+  }
+
+  /**
+   * Fetch data for a range of dates
+   *
+   * @param {*} fields
+   * @param {*} startDate
+   * @param {*} endDate
+   * @returns An array of objects containing the data requested
+   * @memberof Session
+   */
+  fetchDateRange(fields, startDate, endDate) {
+    return new Promise(async (resolve, reject) => {
+      this._fetch(fields, startDate, endDate)
+        .then(res => resolve(res))
+        .catch(err => reject(err));
+    });
+  }
+
+  /**
    * Get data for specified dates
    *
    * @param {*} fields The fields you wish to retrieve
@@ -158,7 +194,7 @@ class Session {
    * object.
    * @memberof Session
    */
-  fetch(fields, startDate, endDate = startDate) {
+  _fetch(fields, startDate, endDate = startDate) {
     // Construct the url to get food & exercise
     const printedDiaryUrl = utils.mfpUrl(this.username, startDate, endDate);
     // Use the authenticated agent if we are logged in
@@ -206,49 +242,6 @@ class Session {
           });
 
           resolve(Promise.all(results));
-        })
-        .catch(err => reject(err));
-    });
-  }
-
-  fetchSingleDate(date, fields) {
-    // Construct the url to get food & exercise
-    const printedDiaryUrl = utils.mfpUrl(this.username, date, date);
-    // Use the authenticated agent if we are logged in
-    const agent = this.authenticated ? this.agent : superagent;
-    return new Promise((resolve, reject) => {
-      parsePage(printedDiaryUrl, agent)
-        .then(async $ => {
-          const diaryEntry = {
-            date,
-            foodTable: $('#food'),
-            exerciseTable: $('#excercise'),
-          };
-
-          const result = {
-            date,
-          };
-
-          // get food if it was requested
-          if (fields.food && diaryEntry.foodTable.length) {
-            result.food = getTableContents(diaryEntry.foodTable, $);
-          }
-
-          // get exercise if it was requested
-          if (fields.exercise && diaryEntry.exerciseTable.length) {
-            result.exercise = formatExerciseObject(
-              getTableContents(diaryEntry.exerciseTable, $)
-            );
-          }
-
-          // get water if it was requested (this requires a different API call)
-          if (fields.water) {
-            const waterApiUrl = utils.mfpwaterApiUrl(this.username, date);
-            result.water = await getWater(waterApiUrl, agent);
-            resolve(result);
-          } else {
-            resolve(result);
-          }
         })
         .catch(err => reject(err));
     });
