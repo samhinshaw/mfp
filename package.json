@@ -4,10 +4,11 @@
   "description": "A third-party API for accessing MyFitnessPal diary data",
   "main": "index.js",
   "scripts": {
-    "test": "gulp test",
+    "test": "nyc mocha",
+    "watch": "nyc mocha -w",
     "lint": "eslint '**/*.js'",
     "format": "npm run lint -- --fix",
-    "coveralls": "gulp coveralls"
+    "coverage": "nyc report --reporter=text-lcov | coveralls"
   },
   "repository": {
     "type": "git",
@@ -50,6 +51,7 @@
     "gulp-istanbul": "^0.10.0",
     "gulp-mocha": "^2.1.2",
     "nock": "^2.6.0",
+    "nyc": "^13.3.0",
     "prettier": "^1.16.4"
   }
 }
