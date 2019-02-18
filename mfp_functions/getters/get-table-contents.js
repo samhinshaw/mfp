@@ -35,6 +35,9 @@ function getFood(table, $) {
   };
 }
 
+//! Note: THIS MUST BE HANDLED DIFFERENTLY THAN THE FOOD TABLE
+//! There is some funky stuff going on with the exercise table and colspans on
+//! the <td> elements which are messing up our indexing to the column header
 function getExercise(table, $) {
   const exerciseCols = getMainTableColNames(table, $);
   const exerciseTitleRows = getTitleRows(table, $);
