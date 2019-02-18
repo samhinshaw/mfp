@@ -77,4 +77,13 @@ module.exports = {
 
     return str;
   },
+  trimText(text) {
+    return (
+      text
+        // trim extra internal whitespace
+        .replace(/\s\s+/g, ' ')
+        // trim leading/trailing whitespace
+        .trim()
+    );
+  },
 };

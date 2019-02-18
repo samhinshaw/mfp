@@ -3,10 +3,7 @@ const superagent = require('superagent');
 
 const utils = require('./utils');
 const { parsePage } = require('./parsers/parser');
-const {
-  getTableContents,
-  formatExerciseObject,
-} = require('./getters/get-table-contents');
+const { getFood, getExercise } = require('./getters/get-table-contents');
 const getWater = require('./getters/get-water');
 const checkAccess = require('./parsers/check-access');
 
@@ -208,11 +205,15 @@ class Session {
           // For each diary entry encountered, add the date formatted as
           // YYYY-MM-DD and the food & exercise tables the entry array.
           $('.main-title-2').each((index, el) => {
-            const element = $(el);
+            const dateHeader = $(el);
+            const foodTable = dateHeader.next('#food');
+            // Next only gets the very next sibling, so we must get the exercise
+            // table from the foodTable, not from the date header
+            const exerciseTable = foodTable.next('#excercise');
             diaryEntries.push({
-              date: utils.formatDate(new Date(element.text())),
-              foodTable: element.next('#food'),
-              exerciseTable: element.next('#excercise'),
+              date: utils.formatDate(new Date(dateHeader.text())),
+              foodTable,
+              exerciseTable,
             });
           });
 
@@ -221,14 +222,12 @@ class Session {
             const result = {};
             // get food if it was requested
             if (fields.food && diaryEntry.foodTable.length) {
-              result.food = getTableContents(diaryEntry.foodTable, $);
+              result.food = getFood(diaryEntry.foodTable, $);
             }
 
             // get exercise if it was requested
             if (fields.exercise && diaryEntry.exerciseTable.length) {
-              result.exercise = formatExerciseObject(
-                getTableContents(diaryEntry.exerciseTable, $)
-              );
+              result.exercise = getExercise(diaryEntry.exerciseTable, $);
             }
             if (fields.water) {
               const waterApiUrl = utils.mfpwaterApiUrl(

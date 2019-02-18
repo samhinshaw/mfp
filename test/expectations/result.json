@@ -1,0 +1,108 @@
+{
+  "food": {
+    "meals": [
+      {
+        "name": "Food",
+        "items": [
+          {
+            "name": "Butter - Salted, 1 tsp(s)",
+            "calories": 34,
+            "carbs": 0,
+            "fat": 4,
+            "protein": 0,
+            "cholesterol": 10,
+            "sodium": 27,
+            "sugar": 0,
+            "fiber": 0
+          },
+          {
+            "name": "Silk Almond Milk - Unsweetened - Unsweetened Almond Milk, 254 milliliter",
+            "calories": 32,
+            "carbs": 1,
+            "fat": 3,
+            "protein": 1,
+            "cholesterol": 0,
+            "sodium": 172,
+            "sugar": 0,
+            "fiber": 1
+          }
+        ]
+      },
+      {
+        "name": "Recipes",
+        "items": [
+          {
+            "name": "Sunkist prunes - Prunes, 2 prunes",
+            "calories": 40,
+            "carbs": 10,
+            "fat": 0,
+            "protein": 0,
+            "cholesterol": 0,
+            "sodium": 0,
+            "sugar": 6,
+            "fiber": 1
+          },
+          {
+            "name": "Arepas, 2 serving(s)",
+            "calories": 424,
+            "carbs": 84,
+            "fat": 7,
+            "protein": 9,
+            "cholesterol": 0,
+            "sodium": 82,
+            "sugar": 0,
+            "fiber": 4
+          }
+        ]
+      }
+    ],
+    "totals": {
+      "calories": 530,
+      "carbs": 95,
+      "fat": 14,
+      "protein": 10,
+      "cholesterol": 10,
+      "sodium": 281,
+      "sugar": 6,
+      "fiber": 6
+    }
+  },
+  "exercise": {
+    "cardiovascular": {
+      "exercises": [
+        {
+          "name": "Bodyweight Training",
+          "calories": 193,
+          "minutes": 20
+        },
+        {
+          "name": "Walking, 3.0 mph, mod. pace",
+          "calories": 195,
+          "minutes": 49
+        }
+      ]
+    },
+    "strength": {
+      "exercises": [
+        {
+          "name": "Biceps Curl",
+          "minutes": 2,
+          "sets": 10,
+          "reps": 20
+        },
+        {
+          "name": "Push-ups",
+          "minutes": 1,
+          "sets": 10
+        }
+      ]
+    },
+    "totals": {
+      "calories": 388,
+      "minutes": 69,
+      "sets": 3,
+      "reps": 20,
+      "weight": 20
+    }
+  }
+}

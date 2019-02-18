@@ -1,55 +1,71 @@
 const utils = require('../utils');
-const { shorthandFields } = require('../constants');
+const {
+  getMainTableColNames,
+  getTitleRows,
+  getGroupRows,
+  transformExerciseTable,
+} = require('./table-helpers');
 
-function getTableContents(tableSelector, $) {
-  // First check that table exists
-  if ($(tableSelector).length < 1) {
-    return {};
-  }
+function getFood(table, $) {
+  const foodCols = getMainTableColNames(table, $);
 
-  const table = $(tableSelector);
+  const mealTitleRows = getTitleRows(table, $);
 
-  // set results object to store data
-  const results = {};
+  const meals = getGroupRows(mealTitleRows, foodCols, $);
 
-  // define variable for determining columns of fields on MFP page
-  const cols = {};
-
-  // find and set column numbers of nutrient fields
+  // Get totals row except for "TOTAL:"
+  const totals = {};
   table
-    .find('thead')
+    .find('tfoot')
     .find('tr')
-    .find('td')
-    .each((index, el) => {
-      const element = $(el);
-      let fieldName = element.text().toLowerCase();
-      fieldName = shorthandFields[fieldName]
-        ? shorthandFields[fieldName]
-        : fieldName;
-      // unless we're at the first field, which just says "Foods", store the
-      // index of the column
-      if (index !== 0) {
-        cols[fieldName] = index;
+    .find('td.first')
+    .nextAll()
+    .get()
+    .forEach((stat, index) => {
+      // Only add the cell if it's truthy
+      const statText = utils.trimText($(stat).text());
+      if (statText) {
+        totals[foodCols[index]] = utils.convertToNum(statText);
       }
     });
 
-  // find row in MFP with nutrient totals
-  const dataRow = table.find('tfoot').find('tr');
-
-  // store data for each requested field in results
-  Object.keys(cols).forEach(field => {
-    const col = cols[field] + 1; // because nth-child selector is 1-indexed, not 0-indexed
-    const mfpData = dataRow
-      .find(`td:nth-child(${col})`)
-      .first()
-      .text();
-    results[field] = utils.convertToNum(mfpData);
-  });
-
-  return results;
+  return {
+    meals,
+    totals,
+  };
 }
 
-function formatExerciseObject(exercise) {
+function getExercise(table, $) {
+  const exerciseCols = getMainTableColNames(table, $);
+  const exerciseTitleRows = getTitleRows(table, $);
+  const exercises = getGroupRows(exerciseTitleRows, exerciseCols, $);
+
+  // Get totals row except for "TOTAL:"
+  const totals = {};
+  table
+    .find('tfoot')
+    .find('tr')
+    .find('td.first')
+    .nextAll()
+    .get()
+    .forEach((stat, index) => {
+      // Only add the cell if it's truthy
+      const statText = utils.trimText($(stat).text());
+      if (statText) {
+        totals[exerciseCols[index]] = utils.convertToNum(statText);
+      }
+    });
+
+  // Transform from the abstract "named groups" format that we use for the
+  // meals to the specific format we can use for exercises, since we already
+  // know what the two groups will be named
+  return transformExerciseTable({
+    exercises,
+    totals,
+  });
+}
+
+function formatExerciseTotals(exercise) {
   return {
     cardio: {
       calories: exercise.calories,
@@ -63,4 +79,4 @@ function formatExerciseObject(exercise) {
   };
 }
 
-module.exports = { getTableContents, formatExerciseObject };
+module.exports = { getFood, getExercise, formatExerciseTotals };

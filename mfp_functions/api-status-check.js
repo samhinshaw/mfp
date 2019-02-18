@@ -1,7 +1,9 @@
 const diaryStatusCheck = require('./diary-status-check');
-const fetchSingleDate = require('./fetch-single-date');
+const Session = require('./session');
+
+const session = new Session('user');
 // this function checks to see if MyFitnessPal has changed the structure of their data presentation
-// by checking to see if running 'fetchSingleDate' returns the expected data values for a known page
+// by checking to see if running 'session.fetchSingleDate' returns the expected data values for a known page
 
 function apiStatusCheck(callback) {
   const errors = [];
@@ -47,7 +49,7 @@ function apiStatusCheck(callback) {
   });
 
   // Check 4
-  fetchSingleDate('npmmfp', '2014-09-13', 'all', data => {
+  session.fetchSingleDate('npmmfp', '2014-09-13', 'all', data => {
     // const expected = {
     //   date: '2014-09-13',
     //   calories: 2078,
@@ -61,7 +63,9 @@ function apiStatusCheck(callback) {
     // };
 
     if (data.calories !== 2078 || data.carbs !== 98 || data.sugar !== 14) {
-      errors.push("fetchSingleDate with all nutrients isn't working correctly");
+      errors.push(
+        "session.fetchSingleDate with all nutrients isn't working correctly"
+      );
     }
     remainingChecks -= remainingChecks;
     if (!remainingChecks) {
@@ -70,7 +74,7 @@ function apiStatusCheck(callback) {
   });
 
   // Check 5
-  fetchSingleDate('npmmfp', '2014-09-14', ['calories', 'fat'], data => {
+  session.fetchSingleDate('npmmfp', '2014-09-14', ['calories', 'fat'], data => {
     // const expected = {
     //   date: '2014-09-14',
     //   calories: 2078,
@@ -83,7 +87,7 @@ function apiStatusCheck(callback) {
       data.date !== '2014-09-14'
     ) {
       errors.push(
-        "fetchSingleDate with user-specified nutrients isn't working correctly"
+        "session.fetchSingleDate with user-specified nutrients isn't working correctly"
       );
     }
     remainingChecks -= remainingChecks;
