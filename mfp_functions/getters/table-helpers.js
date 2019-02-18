@@ -27,7 +27,39 @@ function getTitleRows(table) {
     .get();
 }
 
-function getGroupRows(titleRows, cols, $) {
+function getFooterCells(table) {
+  return table
+    .find('tfoot')
+    .find('tr')
+    .find('td.first')
+    .nextAll()
+    .get();
+}
+
+function getItemStats(listOfCells, statNames, $) {
+  let indexAccommodatingForColspans = 0;
+  const item = {};
+  listOfCells.forEach(stat => {
+    // Only add the cell if it's truthy
+    const statText = utils.trimText($(stat).text());
+    if (statText) {
+      const statName = statNames[indexAccommodatingForColspans];
+      item[statName] = utils.convertToNum(statText);
+    }
+    // Also, accommodate for colspans so we can skip the appropriate number of
+    // cells corresponding to the header.
+    //* Note: This assumes there were no colspans in the header.
+    const colspan = $(stat).attr('colspan');
+    if (colspan) {
+      indexAccommodatingForColspans += parseInt(colspan, 10);
+    } else {
+      indexAccommodatingForColspans += 1;
+    }
+  });
+  return item;
+}
+
+function getGroupRows(titleRows, statNames, $) {
   return titleRows.map(titleRow => {
     const groupNames = $(titleRow)
       .find('td')
@@ -42,21 +74,15 @@ function getGroupRows(titleRows, cols, $) {
       .nextUntil('.title')
       .get()
       .map(groupRow => {
-        const item = {};
         const itemNameCell = $(groupRow)
           .find('td')
           .first();
+
+        const statCells = itemNameCell.nextAll().get();
+
+        const item = getItemStats(statCells, statNames, $);
         item.name = utils.trimText(itemNameCell.text());
-        itemNameCell
-          .nextAll()
-          .get()
-          .forEach((stat, index) => {
-            // Only add the cell if it's truthy
-            const statText = utils.trimText($(stat).text());
-            if (statText) {
-              item[cols[index]] = utils.convertToNum(statText);
-            }
-          });
+
         return item;
       });
     return { name: groupName, items };
@@ -89,5 +115,7 @@ module.exports = {
   getMainTableColNames,
   getTitleRows,
   getGroupRows,
+  getItemStats,
   transformExerciseTable,
+  getFooterCells,
 };

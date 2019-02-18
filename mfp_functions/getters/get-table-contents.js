@@ -1,33 +1,22 @@
-const utils = require('../utils');
 const {
   getMainTableColNames,
   getTitleRows,
   getGroupRows,
+  getItemStats,
   transformExerciseTable,
+  getFooterCells,
 } = require('./table-helpers');
 
 function getFood(table, $) {
-  const foodCols = getMainTableColNames(table, $);
+  const foodStatNames = getMainTableColNames(table, $);
 
   const mealTitleRows = getTitleRows(table, $);
 
-  const meals = getGroupRows(mealTitleRows, foodCols, $);
+  const meals = getGroupRows(mealTitleRows, foodStatNames, $);
 
   // Get totals row except for "TOTAL:"
-  const totals = {};
-  table
-    .find('tfoot')
-    .find('tr')
-    .find('td.first')
-    .nextAll()
-    .get()
-    .forEach((stat, index) => {
-      // Only add the cell if it's truthy
-      const statText = utils.trimText($(stat).text());
-      if (statText) {
-        totals[foodCols[index]] = utils.convertToNum(statText);
-      }
-    });
+  const totalsCells = getFooterCells(table);
+  const totals = getItemStats(totalsCells, foodStatNames, $);
 
   return {
     meals,
@@ -35,29 +24,14 @@ function getFood(table, $) {
   };
 }
 
-//! Note: THIS MUST BE HANDLED DIFFERENTLY THAN THE FOOD TABLE
-//! There is some funky stuff going on with the exercise table and colspans on
-//! the <td> elements which are messing up our indexing to the column header
 function getExercise(table, $) {
-  const exerciseCols = getMainTableColNames(table, $);
+  const exerciseStatNames = getMainTableColNames(table, $);
   const exerciseTitleRows = getTitleRows(table, $);
-  const exercises = getGroupRows(exerciseTitleRows, exerciseCols, $);
+  const exercises = getGroupRows(exerciseTitleRows, exerciseStatNames, $);
 
   // Get totals row except for "TOTAL:"
-  const totals = {};
-  table
-    .find('tfoot')
-    .find('tr')
-    .find('td.first')
-    .nextAll()
-    .get()
-    .forEach((stat, index) => {
-      // Only add the cell if it's truthy
-      const statText = utils.trimText($(stat).text());
-      if (statText) {
-        totals[exerciseCols[index]] = utils.convertToNum(statText);
-      }
-    });
+  const totalsCells = getFooterCells(table);
+  const totals = getItemStats(totalsCells, exerciseStatNames, $);
 
   // Transform from the abstract "named groups" format that we use for the
   // meals to the specific format we can use for exercises, since we already
