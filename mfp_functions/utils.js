@@ -1,13 +1,18 @@
 module.exports = {
   convertToNum(string) {
-    if (typeof string !== 'string')
+    if (typeof string === 'number') {
+      return string;
+    }
+    if (typeof string !== 'string') {
       throw new TypeError("Input type must be 'string'");
+    }
 
     // ignore any characters that aren't numbers or commas
     const newString = string.replace(/[^0-9.]+/g, '');
 
-    if (newString.match(/^[-,0-9]+$/) === null)
-      throw new Error('Input string must contain numbers');
+    if (newString.match(/^[-,0-9]+$/) === null) {
+      return 0;
+    }
 
     return parseInt(string.split(',').join(''), 10);
   },
