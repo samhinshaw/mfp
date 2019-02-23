@@ -219,7 +219,9 @@ class Session {
 
           // iterate through all dates and push data into a final results object
           const results = await diaryEntries.map(async diaryEntry => {
-            const result = {};
+            const result = {
+              date: diaryEntry.date,
+            };
             // get food if it was requested
             if (fields.food && diaryEntry.foodTable.length) {
               result.food = getFood(diaryEntry.foodTable, $);
