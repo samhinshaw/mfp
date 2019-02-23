@@ -16,13 +16,28 @@ npm install mfp --save
 
 ```js
 const { Session } = require('mfp');
+// or
+import { Session } from 'mfp';
 ```
 
-## `new Session(username)` -> `Session`
+## Start a new session
+
+```js
+const session = new Session(username);
+```
 
 Initialize a new session for a given username. Returns a new `Session` object.
 
-## `session.login(password)` -> `Promise<Session>`
+## Authenticate a session (log in)
+
+```js
+const authSession = await session.login(password)
+// or
+session.login(password)
+  .then(authSession => {
+    ...
+  })
+```
 
 (optional) Log in with the username's password. Returns a promise which resolves
 to the authenticated `Session` object.
