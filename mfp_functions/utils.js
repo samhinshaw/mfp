@@ -94,4 +94,10 @@ module.exports = {
         .trim()
     );
   },
+  validateDateOrder(startDate, endDate) {
+    if (new Date(startDate) > new Date(endDate)) {
+      return [endDate, startDate];
+    }
+    return [startDate, endDate];
+  },
 };
