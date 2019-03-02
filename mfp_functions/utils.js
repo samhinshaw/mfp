@@ -59,6 +59,9 @@ module.exports = {
     }
     return `https://www.myfitnesspal.com/food/water/${userId}`;
   },
+  mfpGoalApiUrl(userId, date) {
+    return `https://api.myfitnesspal.com/v2/nutrient-goals?date=2019-03-02`;
+  },
   formatDate(dateObject) {
     if (dateObject.constructor !== Date)
       throw new Error('argument must be a valid JavaScript Date object');

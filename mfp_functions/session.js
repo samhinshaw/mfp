@@ -5,6 +5,7 @@ const utils = require('./utils');
 const { parsePage } = require('./parsers/parser');
 const { getFood, getExercise } = require('./getters/get-table-contents');
 const getWater = require('./getters/get-water');
+const getGoals = require('./getters/get-goals');
 const checkAccess = require('./parsers/check-access');
 
 /**
@@ -237,6 +238,14 @@ class Session {
                 diaryEntry.date
               );
               result.water = await getWater(waterApiUrl, agent, this.headers);
+            }
+
+            if (fields.goals) {
+              const waterApiUrl = utils.mfpWaterApiUrl(
+                this.username,
+                diaryEntry.date
+              );
+              result.water = await getGoals(waterApiUrl, agent, this.headers);
             }
 
             return result;
