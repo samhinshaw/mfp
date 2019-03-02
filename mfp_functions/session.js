@@ -172,7 +172,7 @@ class Session {
     return water.item.milliliters;
   }
 
-  async fetchAccountData() {
+  async fetchAccountInfo() {
     const accountApiUrl = utils.getAccountApiUrl(this.userId);
     const accountInfo = await getJsonApi(
       accountApiUrl,
