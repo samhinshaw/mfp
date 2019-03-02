@@ -100,4 +100,23 @@ module.exports = {
     }
     return [startDate, endDate];
   },
+  // getDatesBetween ideated from:
+  // https://stackoverflow.com/questions/4413590/javascript-get-array-of-dates-between-2-dates
+  /**
+   * Take in two Date objects and return an array of the dates between them inclusive
+   *
+   * @param {Date} startDate - the first date you wish to include
+   * @param {Date} stopDate - the last date you wish to include
+   * @returns {Date[]} - an array of dates between the two dates specified, inclusive
+   */
+  getDatesBetween(startDate, stopDate) {
+    const dateArray = [];
+    let currentDate = startDate;
+    while (currentDate <= stopDate) {
+      dateArray.push(new Date(currentDate));
+      const date = new Date(currentDate);
+      currentDate = date.setDate(date.getDate() + 1);
+    }
+    return dateArray;
+  },
 };
