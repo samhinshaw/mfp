@@ -173,8 +173,12 @@ class Session {
    * @memberof Session
    */
   fetchDateRange(fields, startDate, endDate) {
+    const [validStartDate, validEndDate] = utils.validateDateOrder(
+      startDate,
+      endDate
+    );
     return new Promise(async (resolve, reject) => {
-      this._fetch(fields, startDate, endDate)
+      this._fetch(fields, validStartDate, validEndDate)
         .then(res => resolve(res))
         .catch(err => reject(err));
     });
