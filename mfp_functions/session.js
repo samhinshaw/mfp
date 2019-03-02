@@ -4,8 +4,7 @@ const superagent = require('superagent');
 const utils = require('./utils');
 const { parsePage } = require('./parsers/parser');
 const { getFood, getExercise } = require('./getters/get-table-contents');
-const getWater = require('./getters/get-water');
-const getGoals = require('./getters/get-goals');
+const getJsonApi = require('./getters/get-json-api');
 const checkAccess = require('./parsers/check-access');
 
 /**
@@ -144,6 +143,34 @@ class Session {
     });
   }
 
+  async fetchGoals(date) {
+    const goalApiUrl = utils.getGoalApiUrl(date);
+    const goals = await getJsonApi(goalApiUrl, this.agent, this.headers);
+    return goals.items[0].default_goal;
+  }
+
+  async fetchMeasurements() {
+    const measurementApiUrl = utils.getMeasurementApiUrl();
+    const measurements = await getJsonApi(
+      measurementApiUrl,
+      this.agent,
+      this.headers
+    );
+    return measurements.items[0];
+  }
+
+  async fetchDiary(date) {
+    const diaryApiUrl = utils.getDiaryApiUrl(date);
+    const diary = await getJsonApi(diaryApiUrl, this.agent, this.headers);
+    return diary.items[0];
+  }
+
+  async fetchWater(date) {
+    const waterApiUrl = utils.getWaterApiUrl(this.username, date);
+    const water = await getJsonApi(waterApiUrl, this.agent, this.headers);
+    return water.item.milliliters;
+  }
+
   /**
    * Fetch data for a single date
    *
@@ -223,14 +250,8 @@ class Session {
       }
 
       if (fields.water) {
-        const waterApiUrl = utils.mfpWaterApiUrl(this.username, date);
-        result.water = await getWater(waterApiUrl, this.agent, this.headers);
+        result.water = this.fetchWater(date);
       }
-
-      // if (fields.goals) {
-      //   const goalApiUrl = utils.mfpGoalApiUrl(this.username, date);
-      //   result.goals = await getGoals(goalApiUrl, this.agent, this.headers);
-      // }
 
       return result;
     });

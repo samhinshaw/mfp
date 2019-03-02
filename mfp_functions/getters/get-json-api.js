@@ -1,8 +1,6 @@
 const { parseJSON } = require('../parsers/parser');
 
-// https://api.myfitnesspal.com/v2/nutrient-goals?date=2019-03-02
-
-function getGoals(url, agent, headers) {
+function getJsonApi(url, agent, headers) {
   return new Promise((resolve, reject) => {
     parseJSON(url, agent, headers)
       .then(json => {
@@ -12,4 +10,4 @@ function getGoals(url, agent, headers) {
   });
 }
 
-module.exports = getGoals;
+module.exports = getJsonApi;

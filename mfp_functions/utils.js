@@ -43,7 +43,7 @@ module.exports = {
     // Otherwise no date was specified, and we'll just return today's entry
     return `https://www.myfitnesspal.com/reports/printable_diary/${userId}`;
   },
-  mfpWaterApiUrl(userId, date) {
+  getWaterApiUrl(userId, date) {
     if (typeof userId !== 'string')
       throw new TypeError("User ID must be 'string'");
 
@@ -59,8 +59,14 @@ module.exports = {
     }
     return `https://www.myfitnesspal.com/food/water/${userId}`;
   },
-  mfpGoalApiUrl(userId, date) {
-    return `https://api.myfitnesspal.com/v2/nutrient-goals?date=2019-03-02`;
+  getGoalApiUrl(date) {
+    return `https://api.myfitnesspal.com/v2/nutrient-goals?date=${date}`;
+  },
+  getMeasurementApiUrl() {
+    return `https://api.myfitnesspal.com/v2/incubator/measurements?most_recent=true&type=weight`;
+  },
+  getDiaryApiUrl(date) {
+    return `https://api.myfitnesspal.com/v2/diary?fields%5B%5D=all&entry_date=${date}&types=food_entry%2Cexercise_entry%2Csteps_aggregate`;
   },
   formatDate(dateObject) {
     if (dateObject.constructor !== Date)
