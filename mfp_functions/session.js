@@ -132,6 +132,7 @@ class Session {
               'mfp-client-id': 'mfp-main-js',
               'mfp-user-id': res.body.user_id,
             });
+            this.userId = res.body.user_id;
             // and add a flag signifying we are authenticated
             this.authenticated = true;
             resolve();
@@ -169,6 +170,16 @@ class Session {
     const waterApiUrl = utils.getWaterApiUrl(this.username, date);
     const water = await getJsonApi(waterApiUrl, this.agent, this.headers);
     return water.item.milliliters;
+  }
+
+  async fetchAccountData() {
+    const accountApiUrl = utils.getAccountApiUrl(this.userId);
+    const accountInfo = await getJsonApi(
+      accountApiUrl,
+      this.agent,
+      this.headers
+    );
+    return accountInfo;
   }
 
   /**

@@ -68,6 +68,11 @@ module.exports = {
   getDiaryApiUrl(date) {
     return `https://api.myfitnesspal.com/v2/diary?fields%5B%5D=all&entry_date=${date}&types=food_entry%2Cexercise_entry%2Csteps_aggregate`;
   },
+  getAccountApiUrl(userId) {
+    // figure out how to pull user ID from login response
+    // The response from auth_token should provide it
+    return `https://api.myfitnesspal.com/v2/users/${userId}?fields%5B%5D=diary_preferences&fields%5B%5D=goal_preferences&fields%5B%5D=unit_preferences&fields%5B%5D=account&fields%5B%5D=goal_displays&fields%5B%5D=location_preferences&fields%5B%5D=system_data&fields%5B%5D=profiles&fields%5B%5D=step_sources&fields%5B%5D=app_preferences`;
+  },
   formatDate(dateObject) {
     if (dateObject.constructor !== Date)
       throw new Error('argument must be a valid JavaScript Date object');
