@@ -192,69 +192,104 @@ class Session {
    * object.
    * @memberof Session
    */
-  _fetch(fields, startDate, endDate = startDate) {
+  async _fetch(fields, startDate, endDate = startDate) {
+    const [$, diaryEntries] = await this._getDiaryTables(
+      fields,
+      startDate,
+      endDate
+    );
+
+    // iterate through all dates and push data into a final results object
+    const results = Object.entries(diaryEntries).map(async ([date, entry]) => {
+      const result = {
+        date,
+      };
+
+      if ($ && fields.food && entry.food.wasRetrieved && !entry.food.isEmpty) {
+        result.food = getFood(entry.food.table, $);
+      }
+
+      if (
+        $ &&
+        fields.exercise &&
+        entry.exercise.wasRetrieved &&
+        !entry.exercise.isEmpty
+      ) {
+        result.exercise = getExercise(entry.exercise.table, $);
+      }
+
+      if (fields.water) {
+        const waterApiUrl = utils.mfpWaterApiUrl(this.username, date);
+        result.water = await getWater(waterApiUrl, this.agent, this.headers);
+      }
+
+      // if (fields.goals) {
+      //   const goalApiUrl = utils.mfpGoalApiUrl(this.username, date);
+      //   result.goals = await getGoals(goalApiUrl, this.agent, this.headers);
+      // }
+
+      return result;
+    });
+
+    return Promise.all(results);
+  }
+
+  async _getDiaryTables(fields, startDate, endDate) {
+    const diaryEntries = {};
+
+    utils
+      .getDatesBetween(new Date(startDate), new Date(endDate))
+      // format from date objects to strings as an object
+      .forEach(date => {
+        const formattedDate = date.toISOString().slice(0, 10);
+        diaryEntries[formattedDate] = {
+          food: {
+            wasRetrieved: false,
+            isEmpty: undefined,
+            table: undefined,
+          },
+          exercise: {
+            wasRetrieved: false,
+            isEmpty: undefined,
+            table: undefined,
+          },
+        };
+      });
+
     // Construct the url to get food & exercise
     const printedDiaryUrl = utils.mfpUrl(this.username, startDate, endDate);
-    // Use the authenticated agent if we are logged in
-    const agent = this.authenticated ? this.agent : superagent;
 
-    return new Promise((resolve, reject) => {
-      parsePage(printedDiaryUrl, agent, this.headers)
-        .then(async $ => {
-          const diaryEntries = [];
+    if (fields.food || fields.exercise) {
+      const $ = await parsePage(printedDiaryUrl, this.agent, this.headers);
 
-          // For each diary entry encountered, add the date formatted as
-          // YYYY-MM-DD and the food & exercise tables the entry array.
-          $('.main-title-2').each((index, el) => {
-            const dateHeader = $(el);
-            const foodTable = dateHeader.next('#food');
-            // Next only gets the very next sibling, so we must get the exercise
-            // table from the foodTable, not from the date header
-            const exerciseTable = foodTable.next('#excercise');
-            diaryEntries.push({
-              date: utils.formatDate(new Date(dateHeader.text())),
-              foodTable,
-              exerciseTable,
-            });
-          });
+      // For each diary entry encountered, add the date formatted as
+      // YYYY-MM-DD and the food & exercise tables the entry array.
+      $('.main-title-2').each((index, el) => {
+        const dateHeader = $(el);
+        const foodTable = dateHeader.next('#food');
+        // Next only gets the very next sibling, so we must get the exercise
+        // table from the foodTable, not from the date header
+        const exerciseTable = foodTable.next('#excercise');
 
-          // iterate through all dates and push data into a final results object
-          const results = await diaryEntries.map(async diaryEntry => {
-            const result = {
-              date: diaryEntry.date,
-            };
+        const formattedDate = utils.formatDate(new Date(dateHeader.text()));
 
-            if (fields.food && diaryEntry.foodTable.length) {
-              result.food = getFood(diaryEntry.foodTable, $);
-            }
+        diaryEntries[formattedDate] = {
+          food: {
+            wasRetrieved: true,
+            isEmpty: !foodTable.length,
+            table: foodTable,
+          },
+          exercise: {
+            wasRetrieved: true,
+            isEmpty: !foodTable.length,
+            table: exerciseTable,
+          },
+        };
+      });
 
-            if (fields.exercise && diaryEntry.exerciseTable.length) {
-              result.exercise = getExercise(diaryEntry.exerciseTable, $);
-            }
-
-            if (fields.water) {
-              const waterApiUrl = utils.mfpWaterApiUrl(
-                this.username,
-                diaryEntry.date
-              );
-              result.water = await getWater(waterApiUrl, agent, this.headers);
-            }
-
-            if (fields.goals) {
-              const waterApiUrl = utils.mfpWaterApiUrl(
-                this.username,
-                diaryEntry.date
-              );
-              result.water = await getGoals(waterApiUrl, agent, this.headers);
-            }
-
-            return result;
-          });
-
-          resolve(Promise.all(results));
-        })
-        .catch(err => reject(err));
-    });
+      return [$, diaryEntries];
+    }
+    return [undefined, diaryEntries];
   }
 }
 
