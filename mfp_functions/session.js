@@ -223,17 +223,17 @@ class Session {
             const result = {
               date: diaryEntry.date,
             };
-            // get food if it was requested
+
             if (fields.food && diaryEntry.foodTable.length) {
               result.food = getFood(diaryEntry.foodTable, $);
             }
 
-            // get exercise if it was requested
             if (fields.exercise && diaryEntry.exerciseTable.length) {
               result.exercise = getExercise(diaryEntry.exerciseTable, $);
             }
+
             if (fields.water) {
-              const waterApiUrl = utils.mfpwaterApiUrl(
+              const waterApiUrl = utils.mfpWaterApiUrl(
                 this.username,
                 diaryEntry.date
               );
