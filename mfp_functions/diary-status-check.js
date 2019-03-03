@@ -3,7 +3,7 @@ const cheerio = require('cheerio');
 const helpers = require('./utils');
 
 function diaryStatusCheck(username, callback) {
-  const url = helpers.mfpUrl(username);
+  const url = helpers.getReportUrl(username);
 
   const options = {
     url,

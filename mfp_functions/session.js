@@ -195,7 +195,7 @@ class Session {
    */
   fetchSingleDate(fields, date) {
     return new Promise(async (resolve, reject) => {
-      this._fetch(fields, date)
+      this._fetchPrintedDiary(fields, date)
         .then(res => {
           // _fetch always returns an array, so we need to spread it
           resolve(...res);
@@ -219,7 +219,7 @@ class Session {
       endDate
     );
     return new Promise(async (resolve, reject) => {
-      this._fetch(fields, validStartDate, validEndDate)
+      this._fetchPrintedDiary(fields, validStartDate, validEndDate)
         .then(res => resolve(res))
         .catch(err => reject(err));
     });
@@ -237,7 +237,7 @@ class Session {
    * object.
    * @memberof Session
    */
-  async _fetch(fields, startDate, endDate = startDate) {
+  async _fetchPrintedDiary(fields, startDate, endDate = startDate) {
     const [$, diaryEntries] = await this._getDiaryTables(
       fields,
       startDate,
@@ -296,10 +296,10 @@ class Session {
       });
 
     // Construct the url to get food & exercise
-    const printedDiaryUrl = utils.mfpUrl(this.username, startDate, endDate);
+    const reportUrl = utils.getReportUrl(this.username, startDate, endDate);
 
     if (fields.food || fields.exercise) {
-      const $ = await parsePage(printedDiaryUrl, this.agent, this.headers);
+      const $ = await parsePage(reportUrl, this.agent, this.headers);
 
       // For each diary entry encountered, add the date formatted as
       // YYYY-MM-DD and the food & exercise tables the entry array.

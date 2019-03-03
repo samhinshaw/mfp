@@ -17,7 +17,7 @@ module.exports = {
     return parseInt(string.split(',').join(''), 10);
   },
 
-  mfpUrl(userId, startDate, endDate) {
+  getReportUrl(userId, startDate, endDate) {
     if (typeof userId !== 'string')
       throw new TypeError("User ID must be 'string'");
 
