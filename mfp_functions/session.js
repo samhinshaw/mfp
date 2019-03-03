@@ -88,6 +88,9 @@ class Session {
    */
   _inputPassword(username, password) {
     return new Promise((resolve, reject) => {
+      if (!password || typeof password !== 'string') {
+        reject(new Error('No password was supplied.'));
+      }
       this.agent
         .post('https://www.myfitnesspal.com/account/login')
         .type('form')
