@@ -185,6 +185,14 @@ class Session {
     return accountInfo;
   }
 
+  async fetchCompletionStatus(date) {
+    const diaryUrl = utils.getSingleFoodDiaryUrl(date);
+    const $ = await parsePage(diaryUrl, this.agent, this.headers);
+    const isCompleted =
+      $('#complete_day').find('.day_complete_message').length > 0;
+    return isCompleted;
+  }
+
   /**
    * Fetch data for a single date
    *

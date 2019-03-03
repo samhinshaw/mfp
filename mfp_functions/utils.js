@@ -73,6 +73,9 @@ module.exports = {
     // The response from auth_token should provide it
     return `https://api.myfitnesspal.com/v2/users/${userId}?fields%5B%5D=diary_preferences&fields%5B%5D=goal_preferences&fields%5B%5D=unit_preferences&fields%5B%5D=account&fields%5B%5D=goal_displays&fields%5B%5D=location_preferences&fields%5B%5D=system_data&fields%5B%5D=profiles&fields%5B%5D=step_sources&fields%5B%5D=app_preferences`;
   },
+  getSingleFoodDiaryUrl(date) {
+    return `https://www.myfitnesspal.com/food/diary?date=${date}`;
+  },
   formatDate(dateObject) {
     if (dateObject.constructor !== Date)
       throw new Error('argument must be a valid JavaScript Date object');
