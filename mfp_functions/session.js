@@ -160,19 +160,19 @@ class Session {
       this.agent,
       this.headers
     );
-    return measurements.items[0];
+    return measurements;
   }
 
   async fetchDiary(date) {
     const diaryApiUrl = utils.getDiaryApiUrl(date);
     const diary = await getJsonApi(diaryApiUrl, this.agent, this.headers);
-    return diary.items[0];
+    return diary;
   }
 
   async fetchWater(date) {
     const waterApiUrl = utils.getWaterApiUrl(this.username, date);
     const water = await getJsonApi(waterApiUrl, this.agent, this.headers);
-    return water.item.milliliters;
+    return water;
   }
 
   async fetchAccountInfo() {
