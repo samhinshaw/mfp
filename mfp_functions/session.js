@@ -20,7 +20,7 @@ class Session {
    *Creates an instance of Session.
    * @memberof Session
    */
-  constructor(username) {
+  constructor(username, password) {
     if (typeof username !== 'string') {
       throw new Error('Please supply username as a string.');
     }
@@ -30,7 +30,13 @@ class Session {
       'User-Agent':
         'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36',
     };
-    this.authenticated = false;
+
+    // If the user supplied a password, log in
+    if (password) {
+      this._login(password);
+    } else {
+      this.authenticated = false;
+    }
   }
 
   /**
@@ -40,7 +46,7 @@ class Session {
    * @returns Promise<Session>
    * @memberof Session
    */
-  login(password) {
+  _login(password) {
     if (typeof password !== 'string') {
       throw new Error('Please supply password as a string.');
     }
@@ -135,8 +141,9 @@ class Session {
               'mfp-client-id': 'mfp-main-js',
               'mfp-user-id': res.body.user_id,
             });
+            // and add a flag signifying we are authenticated and save our user
+            // id for later
             this.userId = res.body.user_id;
-            // and add a flag signifying we are authenticated
             this.authenticated = true;
             resolve();
           }
