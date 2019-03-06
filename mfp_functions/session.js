@@ -42,8 +42,8 @@ class Session {
    * @memberof Session
    */
   login(password) {
-    if (typeof password !== 'string') {
-      throw new Error('Please supply password as a string.');
+    if (!password) {
+      throw new Error('Please supply password.');
     }
     return new Promise((resolve, reject) => {
       this._getCRSF()
@@ -149,10 +149,60 @@ class Session {
     });
   }
 
+  /**
+   * Fetch data for a single date
+   *
+   * @param {*} fields
+   * @param {*} date
+   * @returns An object containing the data requested
+   * @memberof Session
+   */
+  fetchSingleDate(fields, date) {
+    if (!fields || !date) {
+      return new Promise((resolve, reject) =>
+        reject(new Error('Error: you must provide fields and a date.'))
+      );
+    }
+    return new Promise(async (resolve, reject) => {
+      this._fetchPrintedDiary(fields, date)
+        .then(res => {
+          // _fetch always returns an array, so we need to spread it
+          resolve(...res);
+        })
+        .catch(err => reject(err));
+    });
+  }
+
+  /**
+   * Fetch data for a range of dates
+   *
+   * @param {*} fields
+   * @param {*} startDate
+   * @param {*} endDate
+   * @returns An array of objects containing the data requested
+   * @memberof Session
+   */
+  fetchDateRange(fields, startDate, endDate) {
+    if (!fields || !startDate || !endDate) {
+      return new Promise((resolve, reject) =>
+        reject(new Error('Error: you must provide fields and a date.'))
+      );
+    }
+    const [validStartDate, validEndDate] = utils.validateDateOrder(
+      startDate,
+      endDate
+    );
+    return new Promise(async (resolve, reject) => {
+      this._fetchPrintedDiary(fields, validStartDate, validEndDate)
+        .then(res => resolve(res))
+        .catch(err => reject(err));
+    });
+  }
+
   async fetchGoals(date) {
     const goalApiUrl = utils.getGoalApiUrl(date);
     const goals = await getJsonApi(goalApiUrl, this.agent, this.headers);
-    return goals.items[0].default_goal;
+    return goals;
   }
 
   async fetchMeasurements() {
@@ -193,46 +243,6 @@ class Session {
     const isCompleted =
       $('#complete_day').find('.day_complete_message').length > 0;
     return isCompleted;
-  }
-
-  /**
-   * Fetch data for a single date
-   *
-   * @param {*} fields
-   * @param {*} date
-   * @returns An object containing the data requested
-   * @memberof Session
-   */
-  fetchSingleDate(fields, date) {
-    return new Promise(async (resolve, reject) => {
-      this._fetchPrintedDiary(fields, date)
-        .then(res => {
-          // _fetch always returns an array, so we need to spread it
-          resolve(...res);
-        })
-        .catch(err => reject(err));
-    });
-  }
-
-  /**
-   * Fetch data for a range of dates
-   *
-   * @param {*} fields
-   * @param {*} startDate
-   * @param {*} endDate
-   * @returns An array of objects containing the data requested
-   * @memberof Session
-   */
-  fetchDateRange(fields, startDate, endDate) {
-    const [validStartDate, validEndDate] = utils.validateDateOrder(
-      startDate,
-      endDate
-    );
-    return new Promise(async (resolve, reject) => {
-      this._fetchPrintedDiary(fields, validStartDate, validEndDate)
-        .then(res => resolve(res))
-        .catch(err => reject(err));
-    });
   }
 
   /**
