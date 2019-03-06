@@ -20,7 +20,7 @@ class Session {
    *Creates an instance of Session.
    * @memberof Session
    */
-  constructor(username, password) {
+  constructor(username) {
     if (typeof username !== 'string') {
       throw new Error('Please supply username as a string.');
     }
@@ -31,12 +31,7 @@ class Session {
         'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36',
     };
 
-    // If the user supplied a password, log in
-    if (password) {
-      this._login(password);
-    } else {
-      this.authenticated = false;
-    }
+    this.authenticated = false;
   }
 
   /**
@@ -46,7 +41,7 @@ class Session {
    * @returns Promise<Session>
    * @memberof Session
    */
-  _login(password) {
+  login(password) {
     if (typeof password !== 'string') {
       throw new Error('Please supply password as a string.');
     }
