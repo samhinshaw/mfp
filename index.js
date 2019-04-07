@@ -1,4 +1,4 @@
-const Session = require('./mfp_functions/session.js');
+const Session = require('./src/session.js');
 
 module.exports = {
   Session,
