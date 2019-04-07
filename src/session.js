@@ -62,21 +62,14 @@ class Session {
    * @memberof Session
    */
   _getCRSF() {
-    return new Promise((resolve, reject) => {
-      this.agent
-        .get('https://www.myfitnesspal.com/account/login')
-        .set(this.headers)
-        .then(res => {
-          const $ = cheerio.load(res.text);
-
-          this.utf8Value = $('input[name="utf8"]').val();
-          this.authenticityToken = $('input[name="authenticity_token"]').val();
-          resolve();
-        })
-        .catch(err => {
-          reject(err);
-        });
-    });
+    return this.agent
+      .get('https://www.myfitnesspal.com/account/login')
+      .set(this.headers)
+      .then(res => {
+        const $ = cheerio.load(res.text);
+        this.utf8Value = $('input[name="utf8"]').val();
+        this.authenticityToken = $('input[name="authenticity_token"]').val();
+      });
   }
 
   /**
@@ -88,30 +81,23 @@ class Session {
    * @memberof Session
    */
   _inputPassword(username, password) {
-    return new Promise((resolve, reject) => {
-      if (!password || typeof password !== 'string') {
-        reject(new Error('No password was supplied.'));
-      }
-      this.agent
-        .post('https://www.myfitnesspal.com/account/login')
-        .type('form')
-        .send({
-          utf8: this.utf8Value,
-          authenticity_token: this.authenticityToken,
-          username,
-          password,
-        })
-        .then(res => {
-          const $ = cheerio.load(res.text);
-
-          checkAccess($)
-            .then(resolve())
-            .catch(err => reject(err));
-        })
-        .catch(err => {
-          reject(err);
-        });
-    });
+    if (!password || typeof password !== 'string') {
+      throw new Error('No password was supplied.');
+    }
+    return this.agent
+      .post('https://www.myfitnesspal.com/account/login')
+      .type('form')
+      .send({
+        utf8: this.utf8Value,
+        authenticity_token: this.authenticityToken,
+        username,
+        password,
+      })
+      .then(res => {
+        const $ = cheerio.load(res.text);
+        // Make sure we didn't run into an error logging in
+        checkAccess($);
+      });
   }
 
   /**
@@ -122,31 +108,31 @@ class Session {
    * @memberof Session
    */
   _getToken() {
-    return new Promise((resolve, reject) => {
-      this.agent
-        .get('https://www.myfitnesspal.com/user/auth_token')
-        .query({ refresh: true })
-        .then(res => {
-          if (!res.ok) {
-            reject(new Error(`Unable to get Auth Token: Status ${res.status}`));
-          } else {
-            // update our request headers with the necessary auth info
-            this.headers = Object.assign({}, this.headers, {
-              Authorization: `${res.body.token_type} ${res.body.access_token}`,
-              'mfp-client-id': 'mfp-main-js',
-              'mfp-user-id': res.body.user_id,
-            });
-            // and add a flag signifying we are authenticated and save our user
-            // id for later
-            this.userId = res.body.user_id;
-            this.authenticated = true;
-            resolve();
-          }
-        })
-        .catch(err => {
-          reject(err);
-        });
-    });
+    return this.agent
+      .get('https://www.myfitnesspal.com/user/auth_token')
+      .query({ refresh: true })
+      .then(res => {
+        // we need ALL these parameters to continue
+        if (
+          res.body &&
+          res.body.token_type &&
+          res.body.access_token &&
+          res.body.user_id
+        ) {
+          // update our request headers with the necessary auth info
+          this.headers = Object.assign({}, this.headers, {
+            Authorization: `${res.body.token_type} ${res.body.access_token}`,
+            'mfp-client-id': 'mfp-main-js',
+            'mfp-user-id': res.body.user_id,
+          });
+          // and add a flag signifying we are authenticated and save our user
+          // id for later
+          this.userId = res.body.user_id;
+          this.authenticated = true;
+        } else {
+          throw new Error(`Unable to get Auth Token: Status ${res.status}`);
+        }
+      });
   }
 
   /**
@@ -159,18 +145,10 @@ class Session {
    */
   fetchSingleDate(fields, date) {
     if (!fields || !date) {
-      return new Promise((resolve, reject) =>
-        reject(new Error('Error: you must provide fields and a date.'))
-      );
+      throw new Error('Error: you must provide fields and a date.');
     }
-    return new Promise(async (resolve, reject) => {
-      this._fetchPrintedDiary(fields, date)
-        .then(res => {
-          // _fetch always returns an array, so we need to spread it
-          resolve(...res);
-        })
-        .catch(err => reject(err));
-    });
+    // _fetch always returns an array, so we need to deconstruct it
+    return this._fetchPrintedDiary(fields, date).then(([res]) => res);
   }
 
   /**
@@ -184,19 +162,13 @@ class Session {
    */
   fetchDateRange(fields, startDate, endDate) {
     if (!fields || !startDate || !endDate) {
-      return new Promise((resolve, reject) =>
-        reject(new Error('Error: you must provide fields and a date.'))
-      );
+      throw new Error('Error: you must provide fields and a date.');
     }
     const [validStartDate, validEndDate] = utils.validateDateOrder(
       startDate,
       endDate
     );
-    return new Promise(async (resolve, reject) => {
-      this._fetchPrintedDiary(fields, validStartDate, validEndDate)
-        .then(res => resolve(res))
-        .catch(err => reject(err));
-    });
+    return this._fetchPrintedDiary(fields, validStartDate, validEndDate);
   }
 
   async fetchGoals(date) {

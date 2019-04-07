@@ -29,13 +29,10 @@ const errors = [
  */
 function checkAccess($) {
   // Check each specified error type
-  return new Promise((resolve, reject) => {
-    errors.forEach(error => {
-      if ($(`:contains("${error.message}")`).length > 0) {
-        reject(new Error(`${error.type}\n${error.message}\n${error.remedy}`));
-      }
-    });
-    resolve();
+  errors.forEach(error => {
+    if ($(`:contains("${error.message}")`).length > 0) {
+      throw new Error(`${error.type}\n${error.message}\n${error.remedy}`);
+    }
   });
 }
 module.exports = checkAccess;
