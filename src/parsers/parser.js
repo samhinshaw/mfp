@@ -13,23 +13,17 @@ const checkAccess = require('./check-access');
  * @returns
  */
 function parsePage(url, agent, headers) {
-  return new Promise((resolve, reject) => {
-    agent
-      .get(url)
-      .set(headers)
-      .then(res => {
-        // load DOM from HTML file
-        const $ = cheerio.load(res.text);
+  return agent
+    .get(url)
+    .set(headers)
+    .then(res => {
+      // load DOM from HTML file
+      const $ = cheerio.load(res.text);
 
-        // Check that we have authorized access
-        checkAccess($)
-          .then(() => resolve($))
-          .catch(err => reject(err));
-      })
-      .catch(err => {
-        reject(err);
-      });
-  });
+      // Check that we have authorized access
+      checkAccess($);
+      return $;
+    });
 }
 
 function parseJSON(url, agent, headers) {
